@@ -8,6 +8,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY api.py .
 COPY regression.joblib .
 
-EXPOSE 8000
-
 CMD ["python", "api.py"]

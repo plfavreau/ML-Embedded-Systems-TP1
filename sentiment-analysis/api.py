@@ -1,14 +1,18 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from transformers import pipeline
+from transformers import pipeline, AutoModelForSequenceClassification, AutoTokenizer
 
 app = FastAPI(
     title="Sentiment Analysis API",
-    description="This API performs sentiment analysis using a BERT model.",
+    description="This API performs sentiment analysis using a lightweight DistilBERT model.",
     version="1.0.0",
 )
 
-sentiment_pipeline = pipeline("sentiment-analysis")
+# Load a smaller, distilled model
+model_name = "distilbert-base-uncased-finetuned-sst-2-english"
+model = AutoModelForSequenceClassification.from_pretrained(model_name)
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+sentiment_pipeline = pipeline("sentiment-analysis", model=model, tokenizer=tokenizer)
 
 class TextData(BaseModel):
     text: str
@@ -16,7 +20,7 @@ class TextData(BaseModel):
     class Config:
         schema_extra = {
             "example": {
-                "text": "This is a simple test, ml ops is amazing"
+                "text": "This is a simple test, ml ops is so amazing !"
             }
         }
 
@@ -35,7 +39,7 @@ async def root():
     """
     Root endpoint that returns a welcome message.
     """
-    return {"message": "Sentiment Analysis API"}
+    return {"message": "Lightweight Sentiment Analysis API"}
 
 if __name__ == "__main__":
     import uvicorn

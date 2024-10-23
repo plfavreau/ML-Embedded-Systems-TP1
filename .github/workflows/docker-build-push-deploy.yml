@@ -1,4 +1,4 @@
-name: Docker Build, Push, and Deploy House Price Predictor model server
+name: Docker Build, Push, and Deploy House Price Predictor and Sentiment Analysis models
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build-push-deploy:
+  build-push-deploy-house-predictor:
     runs-on: ubuntu-latest
 
     steps:
@@ -41,3 +41,39 @@ jobs:
           docker rm house-predictor || true
           docker run -d --name house-predictor -p 5959:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/house-price-predictor:latest
           echo "Deployed"
+
+  build-push-deploy-sentiment-analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+    - name: Build and push Docker image for Sentiment Analysis
+      uses: docker/build-push-action@v6
+      with:
+        context: ./sentiment-analysis
+        file: ./sentiment-analysis/Dockerfile
+        push: true
+        tags: ${{ secrets.DOCKER_HUB_USERNAME }}/sentiment-analysis:latest
+
+    - name: Deploy Sentiment Analysis to server
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        password: ${{ secrets.SERVER_PASSWORD }}
+        script: |
+          cd /home/ubuntu/plf
+          docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/sentiment-analysis:latest
+          docker stop sentiment-analysis || true
+          docker rm sentiment-analysis || true
+          docker run -d --name sentiment-analysis -p 5960:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/sentiment-analysis:latest
+          echo "Sentiment Analysis Deployed"

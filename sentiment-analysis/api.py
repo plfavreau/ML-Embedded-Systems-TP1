@@ -8,7 +8,6 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Load a smaller, distilled model
 model_name = "distilbert-base-uncased-finetuned-sst-2-english"
 model = AutoModelForSequenceClassification.from_pretrained(model_name)
 tokenizer = AutoTokenizer.from_pretrained(model_name)

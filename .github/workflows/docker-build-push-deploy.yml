@@ -35,6 +35,7 @@ jobs:
         password: ${{ secrets.SERVER_PASSWORD }}
         script: |
           cd /home/ubuntu/plf
+          docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/house-price-predictor:latest
           docker stop house-predictor || true
           docker rm house-predictor || true

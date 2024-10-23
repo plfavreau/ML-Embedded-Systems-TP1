@@ -39,5 +39,5 @@ jobs:
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/house-price-predictor:latest
           docker stop house-predictor || true
           docker rm house-predictor || true
-          docker run -d --name house-predictor -p 5959:8000 -v $(pwd):/app ${{ secrets.DOCKER_HUB_USERNAME }}/house-price-predictor:latest
+          docker run -d --name house-predictor -p 5959:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/house-price-predictor:latest
           echo "Deployed"
